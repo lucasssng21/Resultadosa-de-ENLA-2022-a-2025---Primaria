@@ -1,0 +1,611 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Niveles de logro 4.° primaria</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky filter bar, KPI strip, 2-column chart grid (evolution + districts, heatmap + areas), full-width table. */
+:root{
+  --font:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+  --bg:#eef1f5; --surface:#fcfcfb; --ink:#0f1722; --ink2:#46505e; --muted:#667080;
+  --grid:#e1e5ea; --axis:#c3c9d1; --hover:rgba(28,92,171,.09); --border:rgba(15,23,34,.10);
+  --accent:#1c5cab; --on-accent:#ffffff;
+  --lv0:#C00000; --lv1:#FF0000; --lv2:#FFC000; --lv3:#00B050;
+  --y0:#86b6ef; --y1:#5598e7; --y2:#2a78d6; --y3:#184f95; --y4:#0d366b;
+  --hm-lo:#f3f1ee; --hm-hi:#104281;
+  --good:#006300; --bad:#c22f2f;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d0f12; --surface:#1a1a19; --ink:#f0efec; --ink2:#c3c2b7; --muted:#9c9a93;
+  --grid:#2c2c2a; --axis:#383835; --hover:rgba(158,197,244,.12); --border:rgba(255,255,255,.10);
+  --accent:#6da7ec; --on-accent:#0b0b0b;
+  --lv0:#C00000; --lv1:#FF0000; --lv2:#FFC000; --lv3:#00B050;
+  --y0:#184f95; --y1:#256abf; --y2:#3987e5; --y3:#6da7ec; --y4:#b7d3f6;
+  --hm-lo:#262628; --hm-hi:#9ec5f4; --good:#0ca30c; --bad:#ec6a6a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d0f12; --surface:#1a1a19; --ink:#f0efec; --ink2:#c3c2b7; --muted:#9c9a93;
+  --grid:#2c2c2a; --axis:#383835; --hover:rgba(158,197,244,.12); --border:rgba(255,255,255,.10);
+  --accent:#6da7ec; --on-accent:#0b0b0b;
+  --lv0:#C00000; --lv1:#FF0000; --lv2:#FFC000; --lv3:#00B050;
+  --y0:#184f95; --y1:#256abf; --y2:#3987e5; --y3:#6da7ec; --y4:#b7d3f6;
+  --hm-lo:#262628; --hm-hi:#9ec5f4; --good:#0ca30c; --bad:#ec6a6a; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.45;
+  padding-block:0 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,select,input{font:inherit;color:inherit}
+.wrap{max-width:1480px;margin:0 auto}
+header{padding-block:24px 14px;display:flex;gap:16px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+.eyebrow{font:500 11px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+h1{margin:8px 0 0;font-size:clamp(22px,3.4vw,32px);line-height:1.1;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+.sub{margin:6px 0 0;color:var(--ink2);max-width:62ch}
+.themebtn{border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:13px}
+
+/* filters */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;border-bottom:1px solid var(--border)}
+.filters{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:flex-end}
+.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+.f>label,.f>span.l{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:2px}
+.seg button{border:0;background:transparent;padding:6px 11px;border-radius:7px;cursor:pointer;color:var(--ink2);white-space:nowrap}
+.seg button:hover:not(:disabled){background:var(--hover)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface);font-weight:600}
+.seg button:disabled{opacity:.38;cursor:not-allowed;text-decoration:line-through}
+select{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:7px 10px;min-width:190px;max-width:100%}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.reset{border:1px solid var(--border);background:transparent;border-radius:9px;padding:7px 12px;cursor:pointer;color:var(--ink2)}
+.reset:hover{background:var(--hover)}
+.hint{font-size:12px;color:var(--muted);margin:8px 0 0}
+
+/* summary + legend */
+.summary{margin:16px 0 12px;font-size:15px;color:var(--ink2);max-width:90ch}
+.summary b{color:var(--ink);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin-bottom:14px}
+.legend .l{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.chip{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:5px 12px 5px 9px;cursor:pointer;color:var(--ink2)}
+.chip i{width:12px;height:12px;border-radius:3px;display:block}
+.chip[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1px var(--ink)}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;text-align:left;min-width:0;display:flex;flex-direction:column;gap:3px}
+button.tile{cursor:pointer}
+button.tile:hover{background:var(--hover)}
+button.tile[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.tile .k{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2)}
+.tile .k i{width:10px;height:10px;border-radius:3px;display:block;flex:none}
+.tile .v{font-size:clamp(24px,2.6vw,32px);font-weight:600;line-height:1.1;margin-top:4px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.tile .s{font-size:12.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.tile .d{font-size:12px;color:var(--muted);margin-top:2px}
+.tile .d.good{color:var(--good)} .tile .d.bad{color:var(--bad)}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px 14px;min-width:0}
+.c7{grid-column:span 7}.c5{grid-column:span 5}.c12{grid-column:span 12}
+.ch{display:flex;justify-content:space-between;align-items:flex-start;gap:10px 14px;flex-wrap:wrap;margin-bottom:8px}
+.ch h2{margin:0;font-size:15px;font-weight:600;line-height:1.25}
+.ch p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+.mini{display:inline-flex;gap:2px;background:var(--bg);border-radius:8px;padding:2px}
+.mini button{border:0;background:transparent;padding:4px 9px;border-radius:6px;cursor:pointer;font-size:12.5px;color:var(--ink2)}
+.mini button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 0 0 1px var(--border)}
+.mini select{min-width:0;padding:4px 8px;font-size:12.5px;border-radius:7px}
+.plot{width:100%;min-width:0;overflow-x:auto}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{font-family:var(--font)}
+.tk{font:11.5px var(--font);fill:var(--muted)}
+.tkm{font:11px var(--mono);fill:var(--muted)}
+.lab{font:12.5px var(--font);fill:var(--ink2)}
+.lab.sel{fill:var(--ink);font-weight:600}
+.vl{font:600 11.5px var(--font);pointer-events:none}
+.gl{stroke:var(--grid);stroke-width:1}.ax{stroke:var(--axis);stroke-width:1}
+.seg-r{stroke:var(--surface);stroke-width:2}
+.l0{fill:var(--lv0)}.l1{fill:var(--lv1)}.l2{fill:var(--lv2)}.l3{fill:var(--lv3)}
+.s0{stroke:var(--lv0)}.s1{stroke:var(--lv1)}.s2{stroke:var(--lv2)}.s3{stroke:var(--lv3)}
+.col .band{fill:var(--hover);opacity:0}.col .xh{stroke:var(--ink2);stroke-width:1;stroke-dasharray:3 3;opacity:0}
+.col:hover .band,.col:focus-within .band,.col:hover .xh,.col:focus-within .xh{opacity:1}
+.hit{fill:transparent;cursor:pointer;outline:none}
+.hit:focus-visible{stroke:var(--accent);stroke-width:2}
+.vv{font:600 10.5px var(--font);fill:var(--ink2);pointer-events:none}
+.eleg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--ink2);margin:2px 0 4px}.eleg span{display:inline-flex;align-items:center;gap:6px}.eleg i{width:10px;height:10px;border-radius:2px;display:block}
+.nodata{fill:var(--muted);font:italic 12px var(--font)}
+.rowsep{stroke:var(--axis);stroke-dasharray:2 3}
+.cellsel{fill:none;stroke:var(--ink);stroke-width:2;pointer-events:none}
+.note{font-size:12px;color:var(--muted);margin:8px 0 0}
+.hmleg{display:flex;align-items:center;gap:8px;font:11px var(--mono);color:var(--muted);margin-top:8px}
+.hmleg b{display:block;height:8px;width:140px;border-radius:4px;background:linear-gradient(90deg,var(--hm-lo),var(--hm-hi));border:1px solid var(--border)}
+
+/* table */
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tools input{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;min-width:150px}
+.tbl{overflow-x:auto;margin-top:6px;border-top:1px solid var(--border)}
+table{border-collapse:collapse;width:100%;min-width:900px;font-variant-numeric:tabular-nums}
+th,td{padding:7px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--grid)}
+th{font:500 11.5px var(--font);color:var(--ink2);cursor:pointer;user-select:none;background:var(--surface);position:sticky;top:0}
+th.g{text-align:center;cursor:default;font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--axis)}
+th:hover:not(.g){color:var(--ink)}
+th .sw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
+td.t,th.t{text-align:left}
+tr.sel td{background:var(--hover)} tr.tot td{font-weight:600}
+tbody tr:hover td{background:var(--hover)}
+.pc{background-repeat:no-repeat}
+.foot{margin-top:22px;font-size:12px;color:var(--muted);max-width:110ch}
+
+/* summary + motion */
+.stripe{display:flex;gap:3px;margin-top:10px}.stripe i{display:block;width:44px;height:5px;border-radius:3px}
+.evogrid{display:grid;grid-template-columns:minmax(0,1fr) 640px;gap:20px;align-items:start}
+.sumhead{display:flex;flex-direction:column;gap:2px;margin:2px 0 8px}.sumhead b{font:700 13px var(--font);letter-spacing:.03em;color:var(--accent)}.sumhead span{font-size:12.5px;color:var(--muted)}
+table.st{min-width:620px;font-size:12.5px}table.st th,table.st td{padding:7px 4px;text-align:center}
+table.st th{cursor:default;position:static;background:var(--bg);font-size:11px;line-height:1.2;white-space:normal}
+table.st th.g{background:var(--ink2);color:var(--surface);font:600 11px var(--font);letter-spacing:0;text-transform:none;border-bottom:0}
+table.st th.t,table.st td.t{text-align:left}
+table.st td.t b{display:block;font-weight:600}table.st td.t small{color:var(--muted);font:11px var(--mono)}
+table.st tbody tr{cursor:pointer}
+table.st tr.sel td{background:var(--hover)}table.st tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+table.st tr.hov td{background:var(--hover)}
+table.st tr.nd{cursor:default;color:var(--muted)}
+table.st tr.delta td{font:600 12px var(--font);color:var(--ink2);border-top:2px solid var(--axis);background:var(--bg)}
+table.st tr.delta td.good{color:var(--good)}table.st tr.delta td.bad{color:var(--bad)}
+.sp{display:block;width:100%;height:30px;margin-top:6px;overflow:visible}
+.col.on .band{opacity:1}
+.lvb{transition:opacity .15s}
+body[data-hl="0"] .lvb:not(.b0),body[data-hl="1"] .lvb:not(.b1),body[data-hl="2"] .lvb:not(.b2),body[data-hl="3"] .lvb:not(.b3){opacity:.16}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes fadein{from{opacity:0}}
+@media (prefers-reduced-motion:no-preference){.grow{transform-box:fill-box;transform-origin:50% 100%;animation:grow .6s cubic-bezier(.2,.8,.2,1) both}.fade{animation:fadein .5s .4s both}}
+@media (max-width:1300px){.evogrid{grid-template-columns:minmax(0,1fr)}}
+/* tooltip */
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--axis);border-radius:10px;padding:10px 12px;min-width:210px;max-width:290px;box-shadow:0 8px 24px rgba(0,0,0,.18);display:none}
+#tip .tt{font-weight:600;font-size:13px}
+#tip .ts{font-size:12px;color:var(--muted);margin:1px 0 7px}
+#tip .tr{display:grid;grid-template-columns:14px 1fr auto auto;gap:0 8px;align-items:center;padding:2px 0;font-size:12.5px;font-variant-numeric:tabular-nums}
+#tip .tr u{width:14px;height:3px;border-radius:2px;display:block}
+#tip .tr .n{color:var(--ink2)} #tip .tr .a{font-weight:600} #tip .tr .b{color:var(--muted);min-width:46px;text-align:right}
+#tip .tr.on .n{color:var(--ink);font-weight:600}
+#tip .tf{border-top:1px solid var(--grid);margin-top:6px;padding-top:6px;font-size:12px;color:var(--ink2);display:flex;justify-content:space-between}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:8px 14px;border-radius:8px;font-size:13px;display:none;z-index:60}
+
+@media (max-width:1000px){.c7,.c5{grid-column:span 12}.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:620px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.card{padding:14px 12px}select{min-width:0;width:100%}.f{flex:1 1 100%}.seg{width:100%}.seg button{flex:1}}
+@media (prefers-reduced-motion:no-preference){.seg-r{transition:opacity .15s}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Primaria · 4.° grado · UGEL La Mar</div>
+      <h1>Niveles de logro por distrito, 2022 a 2025</h1>
+      <div class="stripe" aria-hidden="true"><i style="background:var(--lv0)"></i><i style="background:var(--lv1)"></i><i style="background:var(--lv2)"></i><i style="background:var(--lv3)"></i></div>
+      <p class="sub">Estudiantes de 4.° de primaria según nivel de logro en ENLA 2022, 2023, 2024 y 2025. Elige área, distrito y evaluación; todos los gráficos responden.</p>
+    </div>
+    <button class="themebtn" id="themebtn" type="button">Cambiar tema</button>
+  </header>
+
+  <div class="bar">
+    <div class="filters">
+      <div class="f"><span class="l">Área</span><div class="seg" id="fArea" role="group" aria-label="Área"></div></div>
+      <div class="f"><label for="fDist">Distrito</label><select id="fDist"></select></div>
+      <div class="f"><span class="l">Evaluación</span><div class="seg" id="fEval" role="group" aria-label="Evaluación"></div></div>
+      <div class="f"><span class="l">Medida</span><div class="seg" id="fMeas" role="group" aria-label="Medida">
+        <button type="button" data-set="measure:count">Cantidad</button><button type="button" data-set="measure:pct">Porcentaje</button></div></div>
+      <button class="reset" id="reset" type="button">Restablecer</button>
+    </div>
+  </div>
+
+  <p class="summary" id="summary" aria-live="polite"></p>
+  <div class="legend" id="legend"></div>
+  <div class="tiles" id="tiles"></div>
+
+  <div class="grid">
+    <section class="card c12">
+      <div class="ch"><div><h2 id="evoT">Evolución por evaluación</h2><p id="evoS"></p></div>
+        <div class="mini" id="fChart" role="group" aria-label="Tipo de gráfico"><button type="button" data-set="chart:evals">Por evaluación</button><button type="button" data-set="chart:bars">Por nivel</button><button type="button" data-set="chart:lines">Líneas</button></div></div>
+      <div class="eleg" id="evoLeg"></div>
+      <div class="evogrid"><div class="plot" id="evo"></div><div id="sum"></div></div>
+    </section>
+    <section class="card c7">
+      <div class="ch"><div><h2 id="heatT">Mapa de calor distrito × evaluación</h2><p id="heatS"></p></div></div>
+      <div class="plot" id="heat"></div>
+      <div class="hmleg" id="hmleg"></div>
+    </section>
+    <section class="card c5">
+      <div class="ch"><div><h2 id="areaT">Todas las áreas</h2><p id="areaS"></p></div></div>
+      <div class="plot" id="areas"></div>
+    </section>
+    <section class="card c12">
+      <div class="ch"><div><h2 id="distT">Comparación entre distritos</h2><p id="distS"></p></div>
+        <div class="mini"><select id="fSort" aria-label="Ordenar distritos"><option value="focus">Ordenar: nivel en foco</option><option value="name">Ordenar: nombre</option><option value="total">Ordenar: estudiantes</option></select></div></div>
+      <div class="plot" id="dist"></div>
+      <p class="note" id="distN"></p>
+    </section>
+    <section class="card c12">
+      <div class="ch"><div><h2>Detalle de resultados</h2><p id="tblS"></p></div>
+        <div class="tools">
+          <div class="mini" id="fScope" role="group" aria-label="Alcance de la tabla"><button type="button" data-set="scope:ev">Evaluación elegida</button><button type="button" data-set="scope:all">Todas las evaluaciones</button></div>
+          <input id="q" type="search" placeholder="Buscar distrito" aria-label="Buscar distrito">
+          <button class="reset" id="copy" type="button">Copiar CSV</button>
+        </div></div>
+      <div class="tbl"><table id="tbl"></table></div>
+    </section>
+  </div>
+  <p class="foot">Fuente: hoja “2018-DRE UGEL LA MAR” del archivo 4P EM-ENLA 2022–2025, filas 22 en adelante, columnas A (evaluación), E (distrito), K (área) y O a V (cantidad y porcentaje por nivel). Cada distrito suma las instituciones educativas que aparecen en la hoja; el total UGEL La Mar proviene de las filas de total y coincide con la suma de los distritos. Los porcentajes se recalculan con esas sumas, por lo que pueden diferir en decimales de los porcentajes por institución. El número de participantes cambia entre años y cada generación de estudiantes es distinta, así que conviene comparar tendencias con cautela. Adaptado por Mg. Lucas Núñez Galindo.</p>
+</div>
+<div id="tip" role="tooltip"></div>
+<div id="toast" role="status"></div>
+
+<script>
+const RAW=[["ENLA 2022","ANCHIHUAY","Lectura",2,8,13,3,1],["ENLA 2022","AYNA","Lectura",15,46,39,18,1],["ENLA 2022","LUIS CARRANZA","Lectura",0,2,4,1,1],["ENLA 2022","SAMUGARI","Lectura",0,8,4,3,1],["ENLA 2022","SAN MIGUEL","Lectura",3,14,14,5,1],["ENLA 2022","SANTA ROSA","Lectura",10,36,40,15,1],["ENLA 2022","TAMBO","Lectura",2,28,23,12,1],["ENLA 2022","UNIÓN PROGRESO","Lectura",3,12,6,5,1],["ENLA 2022","UGEL La Mar","Lectura",35,154,143,62,1],["ENLA 2022","ANCHIHUAY","Matemática",4,2,15,5,1],["ENLA 2022","AYNA","Matemática",36,28,38,16,1],["ENLA 2022","LUIS CARRANZA","Matemática",5,0,2,0,1],["ENLA 2022","SAMUGARI","Matemática",3,3,6,3,1],["ENLA 2022","SAN MIGUEL","Matemática",4,9,20,3,1],["ENLA 2022","SANTA ROSA","Matemática",18,21,40,22,1],["ENLA 2022","TAMBO","Matemática",19,11,22,13,1],["ENLA 2022","UNIÓN PROGRESO","Matemática",4,3,14,5,1],["ENLA 2022","UGEL La Mar","Matemática",93,77,157,67,1],["ENLA 2023","ANCO","Lectura",12,14,7,9,1],["ENLA 2023","AYNA","Lectura",11,46,24,22,1],["ENLA 2023","LUIS CARRANZA","Lectura",3,4,1,0,1],["ENLA 2023","ORONCCOY","Lectura",2,2,2,0,1],["ENLA 2023","RÍO MAGDALENA","Lectura",7,10,4,4,1],["ENLA 2023","SAMUGARI","Lectura",9,46,23,10,1],["ENLA 2023","SAN MIGUEL","Lectura",12,39,31,29,1],["ENLA 2023","SANTA ROSA","Lectura",10,53,27,16,1],["ENLA 2023","TAMBO","Lectura",18,66,25,11,1],["ENLA 2023","UNIÓN PROGRESO","Lectura",2,10,3,5,1],["ENLA 2023","UGEL La Mar","Lectura",86,290,147,106,1],["ENLA 2023","ANCO","Matemática",15,8,9,10,1],["ENLA 2023","AYNA","Matemática",24,31,29,19,1],["ENLA 2023","LUIS CARRANZA","Matemática",3,2,3,0,1],["ENLA 2023","ORONCCOY","Matemática",1,2,3,0,1],["ENLA 2023","RÍO MAGDALENA","Matemática",9,7,7,2,1],["ENLA 2023","SAMUGARI","Matemática",24,24,29,11,1],["ENLA 2023","SAN MIGUEL","Matemática",30,17,43,21,1],["ENLA 2023","SANTA ROSA","Matemática",20,28,47,11,1],["ENLA 2023","TAMBO","Matemática",32,34,42,12,1],["ENLA 2023","UNIÓN PROGRESO","Matemática",3,6,9,2,1],["ENLA 2023","UGEL La Mar","Matemática",161,159,221,88,1],["ENLA 2024","ANCO","Lectura",1,5,12,6,1],["ENLA 2024","AYNA","Lectura",7,60,73,29,1],["ENLA 2024","LUIS CARRANZA","Lectura",3,6,2,0,1],["ENLA 2024","PATIBAMBA","Lectura",0,2,7,5,1],["ENLA 2024","RÍO MAGDALENA","Lectura",1,8,10,3,1],["ENLA 2024","SAMUGARI","Lectura",3,74,76,16,1],["ENLA 2024","SAN MIGUEL","Lectura",3,34,47,41,1],["ENLA 2024","SANTA ROSA","Lectura",8,96,121,41,1],["ENLA 2024","TAMBO","Lectura",6,44,68,32,1],["ENLA 2024","UNIÓN PROGRESO","Lectura",2,7,12,6,1],["ENLA 2024","UGEL La Mar","Lectura",34,336,428,179,1],["ENLA 2024","ANCO","Matemática",2,4,11,7,1],["ENLA 2024","AYNA","Matemática",24,30,80,35,1],["ENLA 2024","LUIS CARRANZA","Matemática",8,1,2,0,1],["ENLA 2024","PATIBAMBA","Matemática",0,2,7,5,1],["ENLA 2024","RÍO MAGDALENA","Matemática",4,3,11,4,1],["ENLA 2024","SAMUGARI","Matemática",21,35,86,27,1],["ENLA 2024","SAN MIGUEL","Matemática",15,20,56,34,1],["ENLA 2024","SANTA ROSA","Matemática",32,61,114,59,1],["ENLA 2024","TAMBO","Matemática",23,35,56,36,1],["ENLA 2024","UNIÓN PROGRESO","Matemática",5,4,9,9,1],["ENLA 2024","UGEL La Mar","Matemática",134,195,432,216,1],["ENLA 2025","ANCO","Lectura",0,6,6,2,1],["ENLA 2025","AYNA","Lectura",2,37,31,19,1],["ENLA 2025","LUIS CARRANZA","Lectura",2,4,0,0,1],["ENLA 2025","SAMUGARI","Lectura",2,20,24,7,1],["ENLA 2025","SAN MIGUEL","Lectura",1,25,15,20,1],["ENLA 2025","SANTA ROSA","Lectura",0,29,39,10,1],["ENLA 2025","TAMBO","Lectura",0,12,24,12,1],["ENLA 2025","UNIÓN PROGRESO","Lectura",0,6,2,3,1],["ENLA 2025","UGEL La Mar","Lectura",7,139,141,73,1],["ENLA 2025","ANCO","Matemática",2,2,6,4,1],["ENLA 2025","AYNA","Matemática",20,13,36,20,1],["ENLA 2025","LUIS CARRANZA","Matemática",3,3,0,0,1],["ENLA 2025","SAMUGARI","Matemática",4,14,22,13,1],["ENLA 2025","SAN MIGUEL","Matemática",13,6,24,18,1],["ENLA 2025","SANTA ROSA","Matemática",10,17,33,18,1],["ENLA 2025","TAMBO","Matemática",3,8,20,17,1],["ENLA 2025","UNIÓN PROGRESO","Matemática",1,2,4,4,1],["ENLA 2025","UGEL La Mar","Matemática",56,65,145,94,1]];
+const LV=['Previo al inicio','En inicio','En proceso','Satisfactorio'];
+const EVALS=['ENLA 2022','ENLA 2023','ENLA 2024','ENLA 2025'];
+const AREAS=['Lectura','Matemática'];
+const UGEL='UGEL La Mar';
+const DB=new Map(RAW.map(r=>[r[0]+'|'+r[1]+'|'+r[2],{c:r.slice(3,7),n:r[7]}]));
+const DISTS=[...new Set(RAW.map(r=>r[1]))].filter(d=>d!==UGEL).sort((a,b)=>a.localeCompare(b,'es'));
+const rec=(e,d,a)=>DB.get(e+'|'+d+'|'+a)||null;
+const sum=c=>c.reduce((x,y)=>x+y,0);
+const pcts=c=>{const t=sum(c);return c.map(v=>t?v/t*100:0)};
+const f0=v=>Math.round(v).toLocaleString('es-PE');
+const f1=v=>v.toLocaleString('es-PE',{minimumFractionDigits:1,maximumFractionDigits:1});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=s=>document.querySelector(s);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const hex2=h=>{h=h.replace('#','');return [0,2,4].map(i=>parseInt(h.substr(i,2),16))};
+const relL=h=>{const [r,g,b]=hex2(h).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*r+.7152*g+.0722*b};
+const inkOn=h=>{const L=relL(h);return (L+.05)/.053>1.05/(L+.05)?'#0b0b0b':'#ffffff'};
+const mix=(a,b,t)=>{const A=hex2(a),B=hex2(b);return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')};
+const availEvals=a=>EVALS.filter(e=>rec(e,UGEL,a));
+const meas=()=>state.measure==='pct';
+const fmtM=(c,i)=>meas()?f1(pcts(c)[i])+' %':f0(c[i]);
+function niceMax(v,n=4){if(v<=0)return{max:1,ticks:[0,1]};const raw=v/n,p=Math.pow(10,Math.floor(Math.log10(raw)));const s=[1,2,2.5,5,10].find(k=>k*p>=raw)*p;const max=Math.ceil(v/s)*s;const t=[];for(let x=0;x<=max+1e-9;x+=s)t.push(+x.toFixed(6));return{max,ticks:t}}
+
+const DEF={area:'Matemática',dist:UGEL,ev:'ENLA 2025',measure:'pct',focus:3,chart:'evals',scope:'ev',sortBy:'focus',q:'',tsort:{k:'p3',dir:-1}};
+const state=JSON.parse(JSON.stringify(DEF));
+
+/* ---------- tooltip & interaction registry ---------- */
+const tip=$('#tip');const reg={};
+function showTip(x,y,m){
+  tip.replaceChildren();
+  const t=document.createElement('div');t.className='tt';t.textContent=m.title;tip.append(t);
+  if(m.sub){const s=document.createElement('div');s.className='ts';s.textContent=m.sub;tip.append(s)}
+  const rows=m.rows||(m.c?(()=>{const p=pcts(m.c);return LV.map((n,i)=>({col:'var(--lv'+i+')',n,a:meas()?f1(p[i])+' %':f0(m.c[i]),b:meas()?f0(m.c[i]):f1(p[i])+' %',on:m.on===i}))})():null);
+  if(rows){
+    rows.forEach(x=>{const r=document.createElement('div');r.className='tr'+(x.on?' on':'');
+      const u=document.createElement('u');u.style.background=x.col;
+      const a=document.createElement('span');a.className='n';a.textContent=x.n;
+      const b=document.createElement('span');b.className='a';b.textContent=x.a;
+      const c=document.createElement('span');c.className='b';c.textContent=x.b;
+      r.append(u,a,b,c);tip.append(r)});
+    if(m.c){const f=document.createElement('div');f.className='tf';
+    const a=document.createElement('span');a.textContent='Estudiantes evaluados';
+    const b=document.createElement('b');b.textContent=f0(sum(m.c));f.append(a,b);tip.append(f)}}
+  else if(m.note){const s=document.createElement('div');s.className='ts';s.textContent=m.note;tip.append(s)}
+  tip.style.display='block';
+  const w=tip.offsetWidth,h=tip.offsetHeight;
+  let L=x+16,T=y+16;if(L+w>innerWidth-8)L=x-w-16;if(L<8)L=8;if(T+h>innerHeight-8)T=y-h-16;if(T<8)T=8;
+  tip.style.left=L+'px';tip.style.top=T+'px';
+}
+const hideTip=()=>{tip.style.display='none'};
+function bind(root,id){
+  root.querySelectorAll('[data-h]').forEach(el=>{
+    const m=reg[id][+el.dataset.h];
+    el.addEventListener('pointermove',e=>showTip(e.clientX,e.clientY,m.tip));
+    el.addEventListener('pointerleave',hideTip);
+    el.addEventListener('focus',()=>{const r=el.getBoundingClientRect();showTip(r.left+r.width/2,r.top+r.height/2,m.tip)});
+    el.addEventListener('blur',hideTip);
+    el.addEventListener('click',()=>{hideTip();m.act&&m.act()});
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();hideTip();m.act&&m.act()}});
+  });
+}
+const hit=(i,x,y,w,h)=>`<rect class="hit" data-h="${i}" tabindex="0" role="button" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',1800)}
+
+/* ---------- state changes ---------- */
+function fixEval(){const av=availEvals(state.area);if(!av.includes(state.ev))state.ev=av[av.length-1]}
+function setState(k,v){
+  if(k==='area'){state.area=v;fixEval()}
+  else if(k==='focus')state.focus=+v;
+  else state[k]=v;
+  render();
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-set]');if(!b||b.disabled)return;
+  const [k,...v]=b.dataset.set.split(':');setState(k,v.join(':'));
+});
+$('#fDist').addEventListener('change',e=>setState('dist',e.target.value));
+$('#fSort').addEventListener('change',e=>setState('sortBy',e.target.value));
+$('#q').addEventListener('input',e=>{state.q=e.target.value.trim().toLowerCase();renderTable()});
+$('#reset').addEventListener('click',()=>{Object.assign(state,JSON.parse(JSON.stringify(DEF)));$('#q').value='';fixEval();render()});
+$('#themebtn').addEventListener('click',()=>{
+  const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  r.dataset.theme=dark?'light':'dark';render();
+});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>render());
+
+/* ---------- static build ---------- */
+$('#fArea').innerHTML=AREAS.map(a=>`<button type="button" data-set="area:${esc(a)}">${esc(a)}</button>`).join('');
+$('#fEval').innerHTML=EVALS.map(e=>`<button type="button" data-set="ev:${esc(e)}">${esc(e)}</button>`).join('');
+$('#fDist').innerHTML=[UGEL,...DISTS].map(d=>`<option value="${esc(d)}">${d===UGEL?'UGEL La Mar (total)':esc(d)}</option>`).join('');
+$('#legend').innerHTML='<span class="l">Nivel en foco</span>'+LV.map((n,i)=>`<button type="button" class="chip" data-set="focus:${i}"><i style="background:var(--lv${i})"></i>${n}</button>`).join('');
+
+/* ---------- sync controls ---------- */
+function sync(){
+  document.querySelectorAll('[data-set]').forEach(b=>{
+    const [k,...v]=b.dataset.set.split(':');const val=v.join(':');
+    b.setAttribute('aria-pressed',String(String(state[k])===val));
+  });
+  $('#fEval').querySelectorAll('button').forEach(b=>{const e=b.dataset.set.split(':')[1];b.disabled=!rec(e,UGEL,state.area)});
+  $('#fDist').value=state.dist;$('#fSort').value=state.sortBy;
+}
+const distName=d=>d===UGEL?'UGEL La Mar (total)':d;
+
+/* ---------- summary + tiles ---------- */
+function prevRec(){
+  const i=EVALS.indexOf(state.ev);
+  for(let j=i-1;j>=0;j--){const r=rec(EVALS[j],state.dist,state.area);if(r)return{e:EVALS[j],r}}
+  return null;
+}
+function renderTop(){
+  const r=rec(state.ev,state.dist,state.area);
+  const s=$('#summary');
+  if(!r){s.textContent=`${distName(state.dist)} no tiene datos de ${state.area} en ${state.ev}. Prueba otra evaluación o distrito.`}
+  else{const p=pcts(r.c);s.innerHTML=`<b>${esc(distName(state.dist))}</b> · ${esc(state.area)} · ${esc(state.ev)}: <b>${f0(sum(r.c))}</b> estudiantes evaluados, <b>${f1(p[3])} %</b> en Satisfactorio y <b>${f1(p[0])} %</b> en Previo al inicio.`}
+  const pv=prevRec();const el=$('#tiles');
+  let h=`<div class="tile"><div class="k">Estudiantes evaluados</div><div class="v">${r?f0(sum(r.c)):'—'}</div><div class="s">${r?(state.dist===UGEL?'total de la UGEL':r.n+' IE en la hoja'):'sin datos'}</div>${pv&&r?`<div class="d">${sum(r.c)>=sum(pv.r.c)?'▲':'▼'} ${f0(Math.abs(sum(r.c)-sum(pv.r.c)))} vs ${esc(pv.e)}</div>`:'<div class="d">&nbsp;</div>'}</div>`;
+  LV.forEach((n,i)=>{
+    let v='—',s2='&nbsp;',d='<div class="d">&nbsp;</div>';
+    if(r){const p=pcts(r.c);v=meas()?f1(p[i])+' %':f0(r.c[i]);s2=meas()?f0(r.c[i])+' estudiantes':f1(p[i])+' % del total';
+      if(pv){const dp=p[i]-pcts(pv.r.c)[i];const up=dp>=0;const good=(i>=2)?up:!up;const flat=Math.abs(dp)<0.05;
+        d=`<div class="d ${flat?'':good?'good':'bad'}">${flat?'■ sin cambio':(up?'▲ ':'▼ ')+f1(Math.abs(dp))+' pp · '+(good?'mejora':'retroceso')} vs ${esc(pv.e)}</div>`}}
+    const ser=EVALS.map(e=>{const rr=rec(e,state.dist,state.area);return rr?pcts(rr.c)[i]:null});
+    const mxs=Math.max(1,...ser.filter(x=>x!=null));const px=j=>6+j*88/(EVALS.length-1),py=v=>27-(v/mxs)*23;
+    const pts=ser.map((v,j)=>v==null?null:[px(j),py(v),j]).filter(Boolean);
+    const spk=`<svg class="sp" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="${pts.map((p,j)=>(j?'L':'M')+p[0]+' '+p[1]).join('')}" fill="none" vector-effect="non-scaling-stroke" style="stroke:var(--lv${i});stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round"/></svg>`;
+    h+=`<button type="button" class="tile" data-set="focus:${i}"><div class="k"><i style="background:var(--lv${i})"></i>${n}</div><div class="v">${v}</div><div class="s">${s2}</div>${d}${spk}</button>`;
+  });
+  el.innerHTML=h;
+  el.querySelectorAll('button.tile').forEach((b,i)=>b.setAttribute('aria-pressed',String(state.focus===i)));
+  document.querySelectorAll('.chip').forEach((b,i)=>b.setAttribute('aria-pressed',String(state.focus===i)));
+}
+
+/* ---------- 3D bars helpers ---------- */
+const shade=(h,t)=>mix(h,'#000000',t),tint=(h,t)=>mix(h,'#ffffff',t);
+function bar3(x,y,w,h,col,d,sty){
+  if(h<=0.01)return `<rect x="${x}" y="${y-1.5}" width="${w}" height="1.5" style="fill:${col}"/>`;
+  return `<polygon points="${x+w},${y} ${x+w+d},${y-d} ${x+w+d},${y+h-d} ${x+w},${y+h}" style="fill:${shade(col,.32)}"/>`+
+    `<polygon points="${x},${y} ${x+d},${y-d} ${x+w+d},${y-d} ${x+w},${y}" style="fill:${tint(col,.3)}"/>`+
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" style="fill:${col};${sty||''}"/>`;
+}
+function vlabel(cx,y,txt,bw,bold){
+  const hz=bw>=txt.length*6.3;const st=bold?'font-weight:700':'';
+  return hz?`<text class="vv" x="${cx}" y="${y}" text-anchor="middle" style="${st}">${txt}</text>`
+    :`<text class="vv" transform="translate(${cx+3.6},${y}) rotate(-90)" text-anchor="start" style="${st}">${txt}</text>`;
+}
+const barDims=(slot,ns,maxBw=34)=>{const bw=Math.max(8,Math.min(maxBw,(slot*.84/ns-2)/1.28));const d=Math.round(bw*.28);return{bw,d,step:bw+d+2}};
+const pctTxt=v=>v.toFixed(2)+'%';
+
+/* ---------- evolution (grouped 3D bars / lines) ---------- */
+function wrapTxt(s,max){const out=[];let cur='';s.split(' ').forEach(w=>{if(cur&&(cur+' '+w).length>max){out.push(cur);cur=w}else cur=cur?cur+' '+w:w});if(cur)out.push(cur);return out}
+function renderEvo(){
+  const el=$('#evo');const W=Math.max(300,el.clientWidth);const H=W<520?380:430;
+  const mode=state.chart,lines=mode==='lines',byEval=mode==='evals',pm=meas();
+  $('#evoT').textContent=byEval?'Resultados de las evaluaciones estandarizadas ENLA de 2022 al 2025':lines?'Tendencia 2022–2025 por nivel de logro':'Comparativo 2022–2025 por nivel de logro';
+  const data=EVALS.map(e=>({e,r:rec(e,state.dist,state.area)}));
+  const miss=data.filter(d=>!d.r).map(d=>d.e);
+  $('#evoS').textContent=`${distName(state.dist)} · ${state.area} · ${pm?'porcentaje':'cantidad'} de estudiantes por nivel${miss.length?' · sin datos: '+miss.join(', '):''}`;
+  const m={l:50,r:lines?(W<520?84:124):16,t:30,b:byEval?84:70};
+  const iw=W-m.l-m.r,ih=H-m.t-m.b;
+  const vals=data.map(d=>d.r?(pm?pcts(d.r.c):d.r.c):null);
+  const top=niceMax(Math.max(1,...vals.filter(Boolean).flat())*1.14,5);
+  const y=v=>m.t+ih*(1-v/top.max);
+  const yearLeg=EVALS.map((e,i)=>`<span><i style="background:var(--y${i})"></i>${e}</span>`).join('');
+  const lvLeg=LV.map((n,i)=>`<span><i style="background:var(--lv${i})"></i>${n}</span>`).join('');
+  $('#evoLeg').innerHTML=(mode==='bars'?yearLeg:lvLeg);
+  reg.evo=[];let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfico de ${lines?'líneas':'barras agrupadas'} por evaluación">`;
+  top.ticks.forEach(t=>{s+=`<line class="gl" x1="${m.l}" x2="${W-m.r}" y1="${y(t)}" y2="${y(t)}"/><text class="tkm" x="${m.l-8}" y="${y(t)+4}" text-anchor="end">${pm?t.toFixed(0)+'%':f0(t)}</text>`});
+  s+=`<line class="ax" x1="${m.l}" x2="${W-m.r}" y1="${y(0)}" y2="${y(0)}"/>`;
+  if(!lines){
+    const groups=byEval?EVALS:LV,ns=byEval?4:5;const slot=iw/groups.length;
+    const {bw,d,step}=barDims(slot,ns);const gw=step*ns-2;
+    groups.forEach((g,gi)=>{
+      const cxg=m.l+slot*gi+slot/2;const gx=cxg-gw/2;
+      const sv=[...Array(ns)].map((_,k)=>byEval?(vals[gi]?vals[gi][k]:null):(vals[k]?vals[k][gi]:null));
+      let tipM;
+      if(byEval)tipM=data[gi].r?{title:`${state.area} ${g.split(' ')[1]} (${g})`,sub:distName(state.dist),c:data[gi].r.c,on:state.focus}:{title:`${state.area} ${g}`,sub:distName(state.dist),note:'Sin datos para esta combinación'};
+      else tipM={title:`${g} · ${state.area}`,sub:distName(state.dist),rows:EVALS.map((e,k)=>{const r=data[k].r;if(!r)return{col:`var(--y${k})`,n:e,a:'sin datos',b:''};const p=pcts(r.c)[gi];return{col:`var(--y${k})`,n:e,a:pm?pctTxt(p):f0(r.c[gi]),b:pm?f0(r.c[gi]):pctTxt(p),on:e===state.ev}})};
+      const idx=reg.evo.length;reg.evo.push({tip:tipM,act:()=>byEval?setState('ev',g):setState('focus',gi)});
+      const isSel=byEval?g===state.ev:state.focus===gi;
+      s+=`<g class="col" data-e="${byEval?g:''}"><rect class="band" x="${m.l+slot*gi}" y="${m.t-14}" width="${slot}" height="${ih+14}"/>`;
+      sv.forEach((v,k)=>{if(v==null)return;const x=gx+k*step;const h=Math.max(0,y(0)-y(v));
+        const col=css(byEval?'--lv'+k:'--y'+k);const sel=!byEval&&EVALS[k]===state.ev;
+        const cl=byEval?' lvb b'+k:'';
+        s+=`<g class="grow${cl}" style="animation-delay:${k*70+gi*40}ms">${bar3(x,y(v),bw,h,col,d,sel?'stroke:var(--ink);stroke-width:1.5':'')}</g>`;
+        s+=`<g class="fade${cl}">${vlabel(x+bw/2+d/2,y(v)-d-4,pm?pctTxt(v):f0(v),bw+d,!byEval?false:state.focus===k)}</g>`;
+      });
+      let lbl,sub='';
+      if(byEval){lbl=wrapTxt(`${state.area} ${g.split(' ')[1]}`,Math.max(8,Math.floor(slot/7)));sub=data[gi].r?`${g.split(' ')[0]} · n = ${f0(sum(data[gi].r.c))}`:`${g.split(' ')[0]} · sin datos`}
+      else lbl=wrapTxt(g,Math.max(8,Math.floor(slot/7)));
+      lbl.forEach((t,j)=>{s+=`<text class="lab${isSel?' sel':''}" x="${cxg}" y="${y(0)+20+j*14}" text-anchor="middle">${esc(t)}</text>`});
+      if(sub)s+=`<text class="tkm" x="${cxg}" y="${y(0)+20+lbl.length*14}" text-anchor="middle">${esc(sub)}</text>`;
+      if(isSel)s+=`<rect x="${cxg-16}" y="${y(0)+20+lbl.length*14+(sub?8:2)}" width="32" height="3" rx="1.5" style="fill:var(--accent)"/>`;
+      s+=hit(idx,m.l+slot*gi,m.t-14,slot,ih+14+m.b-10)+`</g>`;
+    });
+  }else{
+    const slot=iw/EVALS.length;const cx=i=>m.l+slot*i+slot/2;
+    data.forEach((d,i)=>{
+      const sel=d.e===state.ev;const idx=reg.evo.length;
+      reg.evo.push({tip:d.r?{title:`${d.e} · ${state.area}`,sub:distName(state.dist),c:d.r.c,on:state.focus}:{title:`${d.e} · ${state.area}`,sub:distName(state.dist),note:'Sin datos para esta combinación'},act:()=>setState('ev',d.e)});
+      s+=`<g class="col" data-e="${d.e}"><rect class="band" x="${m.l+slot*i}" y="${m.t-14}" width="${slot}" height="${ih+14}"/><line class="xh" x1="${cx(i)}" x2="${cx(i)}" y1="${m.t}" y2="${y(0)}"/>`;
+      s+=`<text class="lab${sel?' sel':''}" x="${cx(i)}" y="${y(0)+19}" text-anchor="middle">${d.e}</text><text class="tkm" x="${cx(i)}" y="${y(0)+34}" text-anchor="middle">${d.r?'n = '+f0(sum(d.r.c)):'sin datos'}</text>`;
+      if(sel)s+=`<rect x="${cx(i)-16}" y="${y(0)+42}" width="32" height="3" rx="1.5" style="fill:var(--accent)"/>`;
+      s+=hit(idx,m.l+slot*i,m.t-14,slot,ih+14+m.b-10)+`</g>`;
+      if(vals[i])vals[i].forEach((v,k)=>{});
+    });
+    const ends=[];
+    for(let k=0;k<4;k++){
+      const pts=data.map((d,i)=>vals[i]?[cx(i),y(vals[i][k]),i,vals[i][k]]:null).filter(Boolean);if(!pts.length)continue;
+      const f=state.focus===k;
+      s+=`<path d="${pts.map((p,j)=>(j?'L':'M')+p[0]+' '+p[1]).join('')}" fill="none" class="s${k}" stroke-width="${f?3.5:2.5}" stroke-linejoin="round" stroke-linecap="round" style="pointer-events:none"/>`;
+      pts.forEach(p=>{s+=`<circle cx="${p[0]}" cy="${p[1]}" r="${f?5.5:4.5}" class="l${k}" style="stroke:var(--surface);stroke-width:2;pointer-events:none"/><text class="vv" x="${p[0]}" y="${p[1]-10}" text-anchor="middle">${pm?pctTxt(p[3]):f0(p[3])}</text>`});
+      const last=pts[pts.length-1];ends.push({k,y:last[1],x:last[0]});
+    }
+    ends.sort((a,b)=>a.y-b.y);for(let i=1;i<ends.length;i++)if(ends[i].y-ends[i-1].y<14)ends[i].y=ends[i-1].y+14;
+    ends.forEach(e=>{s+=`<text class="tk" x="${e.x+12}" y="${e.y+4}" style="fill:var(--ink2);${state.focus===e.k?'font-weight:600':''}">${LV[e.k]}</text>`});
+  }
+  s+='</svg>';el.innerHTML=s;bind(el,'evo');
+  el.querySelectorAll('g.col[data-e]').forEach(g=>{if(!g.dataset.e)return;g.addEventListener('pointerenter',()=>hlRow(g.dataset.e));g.addEventListener('pointerleave',()=>hlRow(null))});
+}
+
+/* ---------- vertical grouped 3D bars (districts, areas) ---------- */
+function vgroups(el,id,groups,o){
+  const pm=meas();const n=groups.length;const cw0=el.clientWidth||800;
+  const W=Math.max(cw0,n*(o.perGroup||0)+60);const H=o.h||340;
+  const m={l:50,r:14,t:30,b:78};const iw=W-m.l-m.r,ih=H-m.t-m.b;
+  const flat=groups.filter(g=>g.c).flatMap(g=>pm?pcts(g.c):g.c);
+  const top=niceMax(Math.max(1,...flat)*1.14,5);const y=v=>m.t+ih*(1-v/top.max);
+  const slot=iw/n;const {bw,d,step}=barDims(slot,4);const gw=step*4-2;
+  reg[id]=[];
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="${W>cw0?`width:${W}px;max-width:none`:''}" role="img" aria-label="${esc(o.aria)}">`;
+  top.ticks.forEach(t=>{s+=`<line class="gl" x1="${m.l}" x2="${W-m.r}" y1="${y(t)}" y2="${y(t)}"/><text class="tkm" x="${m.l-8}" y="${y(t)+4}" text-anchor="end">${pm?t.toFixed(0)+'%':f0(t)}</text>`});
+  s+=`<line class="ax" x1="${m.l}" x2="${W-m.r}" y1="${y(0)}" y2="${y(0)}"/>`;
+  const LC=[0,1,2,3].map(i=>css('--lv'+i));
+  groups.forEach((g,gi)=>{
+    const cx=m.l+slot*gi+slot/2;const gx=cx-gw/2;const idx=reg[id].length;
+    reg[id].push({tip:g.c?{title:g.title,sub:g.sub,c:g.c,on:state.focus}:{title:g.title,sub:g.sub,note:'Sin datos para esta combinación'},act:g.act});
+    if(o.sep&&gi===1)s+=`<line class="rowsep" x1="${m.l+slot*gi}" x2="${m.l+slot*gi}" y1="${m.t-10}" y2="${y(0)+50}"/>`;
+    s+=`<g class="col"><rect class="band" x="${m.l+slot*gi}" y="${m.t-14}" width="${slot}" height="${ih+14}"/>`;
+    if(g.c){const v=pm?pcts(g.c):g.c;
+      v.forEach((x,k)=>{const bx=gx+k*step;
+        s+=`<g class="grow lvb b${k}" style="animation-delay:${k*60+gi*25}ms">${bar3(bx,y(x),bw,Math.max(0,y(0)-y(x)),LC[k],d)}</g>`;
+        s+=`<g class="fade lvb b${k}">${vlabel(bx+bw/2+d/2,y(x)-d-4,pm?pctTxt(x):f0(x),bw+d,state.focus===k)}</g>`});
+    }else s+=`<text class="nodata" x="${cx}" y="${y(0)-8}" text-anchor="middle">sin datos</text>`;
+    const lbl=wrapTxt(g.label,Math.max(8,Math.floor(slot/7)));
+    lbl.forEach((t,j)=>{s+=`<text class="lab${g.sel?' sel':''}" x="${cx}" y="${y(0)+20+j*14}" text-anchor="middle">${esc(t)}</text>`});
+    if(g.c)s+=`<text class="tkm" x="${cx}" y="${y(0)+20+lbl.length*14}" text-anchor="middle">n = ${f0(sum(g.c))}</text>`;
+    if(g.sel)s+=`<rect x="${gx-4}" y="${m.t-10}" width="${gw+d+8}" height="${ih+10}" rx="5" fill="none" style="stroke:var(--ink);stroke-width:1.5" pointer-events="none"/>`;
+    s+=hit(idx,m.l+slot*gi,m.t-14,slot,ih+14+m.b-10)+`</g>`;
+  });
+  s+='</svg>';el.innerHTML=s;bind(el,id);
+}
+/* ---------- summary table beside main chart ---------- */
+function hlCol(e){document.querySelectorAll('#evo g.col').forEach(g=>g.classList.toggle('on',!!e&&g.dataset.e===e))}
+function hlRow(e){document.querySelectorAll('#sum tr[data-e]').forEach(tr=>tr.classList.toggle('hov',!!e&&tr.dataset.e===e))}
+function renderSum(){
+  const el=$('#sum');const data=EVALS.map(e=>({e,r:rec(e,state.dist,state.area)}));const ok=data.filter(d=>d.r);
+  const sw=i=>`<span class="sw" style="background:var(--lv${i})"></span>`;
+  let h=`<div class="sumhead"><b>PRIMARIA – CUARTO GRADO</b><span>${esc(distName(state.dist))} · ${esc(state.area)}</span></div><div class="tbl"><table class="st"><thead><tr><th rowspan="2" class="t">Est.<br>partic.</th><th rowspan="2" class="t">Año evaluación</th><th class="g" colspan="4">Cantidad de estudiantes según nivel</th><th class="g" colspan="4">Porcentaje de estudiantes según nivel</th></tr><tr>${LV.map((n,i)=>`<th>${sw(i)}${n}</th>`).join('')}${LV.map((n,i)=>`<th>${sw(i)}${n}</th>`).join('')}</tr></thead><tbody>`;
+  data.forEach(d=>{
+    const [pre,yr]=d.e.split(' ');
+    if(!d.r){h+=`<tr class="nd"><td>—</td><td class="t"><b>${esc(state.area)} ${yr}</b><small>${pre}</small></td><td colspan="8" class="t">sin datos para esta selección</td></tr>`;return}
+    const p=pcts(d.r.c);
+    h+=`<tr data-e="${d.e}" tabindex="0" class="${d.e===state.ev?'sel':''}"><td>${f0(sum(d.r.c))}</td><td class="t"><b>${esc(state.area)} ${yr}</b><small>${pre}</small></td>`;
+    d.r.c.forEach(v=>{h+=`<td><b>${f0(v)}</b></td>`});
+    p.forEach((v,i)=>{h+=`<td class="pc" style="background-image:linear-gradient(90deg,color-mix(in srgb,var(--lv${i}) 32%,transparent) ${v}%,transparent ${v}%)"><b>${pctTxt(v)}</b></td>`});
+    h+='</tr>';
+  });
+  if(ok.length>=2){const a=ok[0],b=ok[ok.length-1];const pa=pcts(a.r.c),pb=pcts(b.r.c);
+    h+=`<tr class="delta"><td colspan="6" class="t">Variación ${a.e} → ${b.e} (puntos porcentuales)</td>`;
+    pb.forEach((v,i)=>{const dv=v-pa[i];const up=dv>=0;const good=i>=2?up:!up;h+=`<td class="${Math.abs(dv)<.005?'':good?'good':'bad'}" title="${good?'Mejora':'Retroceso'}">${up?'▲':'▼'} ${(up?'+':'')+dv.toFixed(2)}</td>`});
+    h+='</tr>'}
+  el.innerHTML=h+'</tbody></table></div><p class="note">Pasa el cursor por una fila para resaltarla en el gráfico. Haz clic para elegirla como evaluación activa.</p>';
+  el.querySelectorAll('tr[data-e]').forEach(tr=>{const e=tr.dataset.e;
+    tr.addEventListener('pointerenter',()=>hlCol(e));tr.addEventListener('pointerleave',()=>hlCol(null));
+    tr.addEventListener('focus',()=>hlCol(e));tr.addEventListener('blur',()=>hlCol(null));
+    tr.addEventListener('click',()=>setState('ev',e));tr.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();setState('ev',e)}});
+  });
+}
+function renderDist(){
+  const pm=meas();const names=pm?[UGEL,...DISTS]:[...DISTS];
+  $('#distT').textContent=`Comparación entre distritos`;
+  $('#distS').textContent=`${state.ev} · ${state.area} · ${pm?'% de estudiantes':'estudiantes'} por nivel`;
+  let rows=names.map(d=>({d,r:rec(state.ev,d,state.area)}));
+  const key=x=>!x.r?-1:state.sortBy==='total'?sum(x.r.c):(pm?pcts(x.r.c)[state.focus]:x.r.c[state.focus]);
+  const body=rows.filter(x=>x.d!==UGEL);
+  if(state.sortBy==='name')body.sort((a,b)=>a.d.localeCompare(b.d,'es'));else body.sort((a,b)=>key(b)-key(a));
+  rows=pm?[rows.find(x=>x.d===UGEL),...body]:body;
+  vgroups($('#dist'),'dist',rows.map(x=>({label:x.d===UGEL?'UGEL La Mar':x.d,title:`${state.ev} · ${state.area}`,sub:distName(x.d),c:x.r?x.r.c:null,sel:x.d===state.dist,act:()=>setState('dist',x.d)})),{sep:pm,perGroup:86,h:380,aria:'Barras agrupadas por distrito'});
+  $('#distN').textContent=pm?'Haz clic en un distrito para elegirlo. n es el número de estudiantes evaluados.':'En cantidad no se muestra el total UGEL para mantener comparable la escala. Haz clic en un distrito para elegirlo.';
+}
+function renderAreas(){
+  $('#areaT').textContent='Todas las áreas';
+  $('#areaS').textContent=`${distName(state.dist)} · ${state.ev}`;
+  vgroups($('#areas'),'areas',AREAS.map(a=>{const r=rec(state.ev,state.dist,a);return{label:a,title:`${state.ev} · ${a}`,sub:distName(state.dist),c:r?r.c:null,sel:a===state.area,act:()=>setState('area',a)}}),{h:420,aria:'Barras agrupadas por área'});
+}
+
+/* ---------- heatmap ---------- */
+function renderHeat(){
+  const el=$('#heat');const pm=meas();const W=Math.max(300,el.clientWidth);
+  const f=state.focus;const names=pm?[...DISTS,UGEL]:[...DISTS];
+  $('#heatT').textContent=`Mapa de calor: ${LV[f]}`;
+  $('#heatS').textContent=`${state.area} · ${pm?'% de estudiantes':'cantidad de estudiantes'} · cambia con el nivel en foco`;
+  const lw=W<460?100:130,top=44,rh=29,cw=(W-lw)/EVALS.length,H=top+names.length*rh+(pm?8:0)+2;
+  const get=(d,e)=>{const r=rec(e,d,state.area);return r?(pm?pcts(r.c)[f]:r.c[f]):null};
+  const all=[];names.forEach(d=>{if(d===UGEL)return;EVALS.forEach(e=>{const v=get(d,e);if(v!=null)all.push(v)})});
+  const mx=Math.max(1,...all);const lo=css('--hm-lo'),hi=css('--lv'+f);$('#hmleg').style.setProperty('--hm-hi',hi);
+  $('#hmleg').innerHTML=`<span>0${pm?' %':''}</span><b></b><span>${pm?f1(mx)+' %':f0(mx)}</span>`;
+  reg.heat=[];let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Mapa de calor del nivel ${LV[f]}">`;
+  EVALS.forEach((e,j)=>{const ok=!!rec(e,UGEL,state.area);
+    s+=`<text class="lab${e===state.ev?' sel':''}" x="${lw+cw*j+cw/2}" y="16" text-anchor="middle" style="${ok?'cursor:pointer':'opacity:.4'}">${W<460?e.replace('ENLA ','EN ').replace('ECE ','EC '):e}</text>`;
+    if(e===state.ev)s+=`<rect x="${lw+cw*j+cw/2-14}" y="23" width="28" height="3" rx="1.5" style="fill:var(--accent)"/>`;
+    if(ok)s+=`<rect class="hit" x="${lw+cw*j}" y="0" width="${cw}" height="30" data-h="${reg.heat.length}" tabindex="0" role="button"/>`,reg.heat.push({tip:{title:e,note:'Elegir esta evaluación'},act:()=>setState('ev',e)});
+  });
+  names.forEach((d,i)=>{
+    const yy=top+i*rh+(pm&&d===UGEL?8:0);
+    if(pm&&d===UGEL)s+=`<line class="rowsep" x1="0" x2="${W}" y1="${yy-4}" y2="${yy-4}"/>`;
+    s+=`<text class="lab${d===state.dist?' sel':''}" x="0" y="${yy+rh/2+4.5}">${esc(d===UGEL?'UGEL La Mar':(d.length>(W<460?13:17)?d.slice(0,(W<460?12:16))+'…':d))}</text>`;
+    EVALS.forEach((e,j)=>{
+      const v=get(d,e);const r=rec(e,d,state.area);const x=lw+cw*j;
+      if(v==null){s+=`<rect x="${x+1}" y="${yy+1}" width="${cw-2}" height="${rh-2}" rx="4" fill="none" style="stroke:var(--axis);stroke-dasharray:3 3"/><text class="nodata" x="${x+cw/2}" y="${yy+rh/2+4}" text-anchor="middle">–</text>`;return}
+      const t=d===UGEL?v/Math.max(mx,v):v/mx;const col=mix(lo,hi,Math.min(1,Math.max(0,t)));
+      const idx=reg.heat.length;reg.heat.push({tip:{title:`${e} · ${state.area}`,sub:distName(d),c:r.c,on:f},act:()=>{state.dist=d;state.ev=e;render()}});
+      s+=`<g class="col"><rect x="${x+1}" y="${yy+1}" width="${cw-2}" height="${rh-2}" rx="4" fill="${col}"/><text class="vl" x="${x+cw/2}" y="${yy+rh/2+4}" text-anchor="middle" fill="${inkOn(col)}">${pm?f1(v):f0(v)}</text>${hit(idx,x,yy,cw,rh)}</g>`;
+      if(d===state.dist&&e===state.ev)s+=`<rect class="cellsel" x="${x+1}" y="${yy+1}" width="${cw-2}" height="${rh-2}" rx="4"/>`;
+    });
+  });
+  s+='</svg>';el.innerHTML=s;bind(el,'heat');
+}
+
+/* ---------- table ---------- */
+const COLS=[['e','Evaluación',1],['d','Distrito',1],['a','Área',1],['t','Estudiantes',0],['c0','Previo al inicio',0,0],['c1','En inicio',0,1],['c2','En proceso',0,2],['c3','Satisfactorio',0,3],['p0','Previo al inicio',0,0],['p1','En inicio',0,1],['p2','En proceso',0,2],['p3','Satisfactorio',0,3]];
+function tableRows(){
+  const out=[];
+  const evs=state.scope==='ev'?[state.ev]:EVALS;
+  evs.forEach(e=>[UGEL,...DISTS].forEach(d=>{const r=rec(e,d,state.area);if(!r)return;
+    if(state.q&&!distName(d).toLowerCase().includes(state.q))return;
+    const p=pcts(r.c);out.push({e,d,a:state.area,t:sum(r.c),c0:r.c[0],c1:r.c[1],c2:r.c[2],c3:r.c[3],p0:p[0],p1:p[1],p2:p[2],p3:p[3]})}));
+  const {k,dir}=state.tsort;
+  out.sort((a,b)=>{const x=a[k],y=b[k];const c=typeof x==='string'?x.localeCompare(y,'es'):x-y;return (c||EVALS.indexOf(a.e)-EVALS.indexOf(b.e))*dir});
+  return out;
+}
+function renderTable(){
+  const rows=tableRows();const t=$('#tbl');
+  $('#tblS').textContent=`${state.area} · ${state.scope==='ev'?state.ev:'todas las evaluaciones'} · ${rows.length} filas`;
+  let h=`<thead><tr><th class="g t" colspan="4">Identificación</th><th class="g" colspan="4">Cantidad de estudiantes según nivel</th><th class="g" colspan="4">Porcentaje de estudiantes según nivel</th></tr><tr>`;
+  COLS.forEach(([k,n,txt,lv])=>{const on=state.tsort.k===k;h+=`<th class="${txt?'t':''}" data-k="${k}" aria-sort="${on?(state.tsort.dir>0?'ascending':'descending'):'none'}">${lv!=null?`<span class="sw" style="background:var(--lv${lv})"></span>`:''}${n}${on?(state.tsort.dir>0?' ▲':' ▼'):''}</th>`});
+  h+='</tr></thead><tbody>';
+  rows.forEach(r=>{
+    h+=`<tr class="${r.d===state.dist&&(state.scope==='all'?r.e===state.ev:true)?'sel':''} ${r.d===UGEL?'tot':''}"><td class="t">${esc(r.e)}</td><td class="t">${esc(distName(r.d))}</td><td class="t">${esc(r.a)}</td><td>${f0(r.t)}</td>`;
+    for(let i=0;i<4;i++)h+=`<td>${f0(r['c'+i])}</td>`;
+    for(let i=0;i<4;i++){const v=r['p'+i];h+=`<td class="pc" style="background-image:linear-gradient(90deg,color-mix(in srgb,var(--lv${i}) 30%,transparent) ${v}%,transparent ${v}%)">${f1(v)} %</td>`}
+    h+='</tr>';
+  });
+  if(!rows.length)h+='<tr><td class="t" colspan="12">Sin resultados.</td></tr>';
+  t.innerHTML=h+'</tbody>';
+  t.querySelectorAll('th[data-k]').forEach(th=>th.addEventListener('click',()=>{
+    const k=th.dataset.k;state.tsort=state.tsort.k===k?{k,dir:-state.tsort.dir}:{k,dir:['e','d','a'].includes(k)?1:-1};renderTable()}));
+}
+$('#copy').addEventListener('click',async()=>{
+  const rows=tableRows();const head=['Evaluación','Distrito','Área','Estudiantes',...LV.map(n=>'Cantidad '+n),...LV.map(n=>'% '+n)];
+  const csv=[head,...rows.map(r=>[r.e,distName(r.d),r.a,r.t,r.c0,r.c1,r.c2,r.c3,...[0,1,2,3].map(i=>r['p'+i].toFixed(1))])].map(l=>l.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  try{await navigator.clipboard.writeText(csv);toast('CSV copiado al portapapeles')}
+  catch(e){const ta=document.createElement('textarea');ta.value=csv;document.body.append(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}ta.remove();toast(ok?'CSV copiado al portapapeles':'No se pudo copiar. Selecciona la tabla y copia manualmente.')}
+});
+
+/* ---------- main ---------- */
+function render(){sync();renderTop();renderEvo();renderSum();renderDist();renderHeat();renderAreas();renderTable()}
+fixEval();render();
+let rz,lastW=0;new ResizeObserver(()=>{const w=document.body.clientWidth;if(w===lastW)return;lastW=w;cancelAnimationFrame(rz);rz=requestAnimationFrame(()=>{renderEvo();renderDist();renderHeat();renderAreas()})}).observe(document.body);
+document.addEventListener('scroll',hideTip,{passive:true});
+document.querySelectorAll('.chip').forEach((c,i)=>{const on=()=>{document.body.dataset.hl=i},off=()=>{delete document.body.dataset.hl};c.addEventListener('pointerenter',on);c.addEventListener('pointerleave',off);c.addEventListener('focus',on);c.addEventListener('blur',off)});
+</script>
+
+</body></html>
